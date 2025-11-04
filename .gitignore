@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Cache
+.cache/
+**/.cache/
+dist/
+build/
+
+# Environment variables - NUNCA subir
+.env
+*.env
+.env.local
+.env.production
+backend/.env
+frontend-react/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db

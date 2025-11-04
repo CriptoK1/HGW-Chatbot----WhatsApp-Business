@@ -1,0 +1,25 @@
+pip uninstall -r requirements.txt -y
+cd hgw-chatbot
+cd backend
+py -m venv venv
+source venv/Scripts/activate
+pip install -r requirements.txt
+uvicorn app:app --reload --port 8000
+
+# En la carpeta backend con el entorno virtual activado
+python
+
+>>> from database import engine, Base
+>>> from models import *
+>>> Base.metadata.create_all(bind=engine)
+>>> exit()
+
+ngrok http 8000
+
+cd hgw-chatbot
+cd frontend-react
+npm install @mui/icons-material
+npm run start
+
+
+pip uninstall -r requirements.txt -y
