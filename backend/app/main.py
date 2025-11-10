@@ -1,4 +1,3 @@
-# backend/app/main.py
 """
 Aplicación principal de HGW Chatbot
 FastAPI con estructura modular y organizada
@@ -14,14 +13,15 @@ import os
 from .config import settings
 from .database import init_db
 
-# Importar routers
+# Importar routers existentes
 from .api.v1 import (
     chatbot,
     distributors,
     conversations,
     leads,
     admin,
-    stats
+    stats,
+    inventory  # NUEVO: Importar el router de inventario
 )
 
 # ==================== NGROK ====================
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="API de HGW Chatbot con panel de administración",
+    description="API de HGW Chatbot con panel de administración y sistema de inventario",
     docs_url="/api/docs",
     redoc_url="/api/redoc"
 )
@@ -209,6 +209,13 @@ app.include_router(
     tags=["estadísticas"]
 )
 
+# NUEVO: Sistema de Inventario
+app.include_router(
+    inventory.router,
+    prefix="/api/v1",
+    tags=["inventario"]
+)
+
 # ===============================================
 # Endpoints Base
 # ===============================================
@@ -228,17 +235,44 @@ async def root():
             "distributors": "/api/v1/distributors",
             "conversations": "/api/v1/conversations",
             "leads": "/api/v1/leads",
-            "stats": "/api/v1/stats"
+            "stats": "/api/v1/stats",
+            # NUEVO: Endpoints de inventario
+            "inventory": {
+                "vendedores": "/api/v1/inventory/vendedores",
+                "productos": "/api/v1/inventory/productos",
+                "stock": "/api/v1/inventory/stock",
+                "ventas": "/api/v1/inventory/ventas",
+                "ajustes": "/api/v1/inventory/ajustes",
+                "asignaciones": "/api/v1/inventory/asignaciones",
+                "estadisticas": "/api/v1/inventory/estadisticas"
+            }
         }
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    # Verificar conexión a la base de datos
+    try:
+        db = next(get_db())
+        # Hacer una consulta simple para verificar la conexión
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+        db_status = "disconnected"
+    finally:
+        try:
+            db.close()
+        except:
+            pass
+    
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
         "version": settings.VERSION,
+        "database": db_status,
         "whatsapp_configured": bool(settings.WHATSAPP_TOKEN),
         "openai_configured": bool(settings.OPENAI_API_KEY)
     }
@@ -271,59 +305,6 @@ async def internal_error_handler(request: Request, exc):
         }
     )
 
-@app.on_event("startup")
-async def startup_event():
-    """Inicialización al arrancar la aplicación"""
-    logger.info(f"Starting {settings.APP_NAME} v{settings.VERSION}")
-    
-    # Inicializar base de datos
-    try:
-        init_db()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Error initializing database: {e}")
-    
-    # Verificar configuración de WhatsApp
-    if not settings.WHATSAPP_TOKEN:
-        logger.warning("WhatsApp token not configured")
-    
-    # Verificar configuración de OpenAI
-    if not settings.OPENAI_API_KEY:
-        logger.warning("OpenAI API key not configured - using auto responses only")
-    
-    # ==================== INICIAR NGROK ====================
-    if settings.USE_NGROK:
-        try:
-            if settings.NGROK_AUTH_TOKEN:
-                ngrok.set_auth_token(settings.NGROK_AUTH_TOKEN)
-                
-            public_url = ngrok.connect(settings.PORT)
-            
-            logger.info("\n" + "="*60)
-            logger.info("🌐 NGROK TÚNEL ACTIVO")
-            logger.info("="*60)
-            logger.info(f"📍 URL pública: {public_url}")
-            logger.info(f"📍 URL webhook: {public_url}/webhook")
-            logger.info(f"📍 URL docs: {public_url}/api/docs")
-            logger.info("="*60 + "\n")
-            
-        except Exception as e:
-            logger.error(f"⚠️ Error iniciando ngrok: {e}")
-            logger.error("💡 Asegúrate de tener tu NGROK_AUTH_TOKEN configurado")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Limpieza al cerrar la aplicación"""
-    logger.info("Shutting down application")
-    
-    # Cerrar túnel ngrok
-    if settings.USE_NGROK:
-        try:
-            ngrok.kill()
-            logger.info("🔴 Túnel ngrok cerrado")
-        except:
-            pass
-
 # ===============================================
 # Función principal para desarrollo
 # ===============================================
@@ -334,7 +315,7 @@ if __name__ == "__main__":
     # Configuración para desarrollo
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
-        app,
+        "app.main:app",  # Cambiar para que apunte correctamente al módulo
         host="0.0.0.0",
         port=port,
         reload=True,  # Recarga automática en desarrollo

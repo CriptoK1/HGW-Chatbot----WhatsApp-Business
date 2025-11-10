@@ -38,7 +38,25 @@ def get_db():
         db.close()
 
 def init_db():
-    """Crea todas las tablas en la base de datos"""
-    from models import Conversation, Message, Lead
+    """Inicializa la base de datos creando todas las tablas"""
+    # Importar TODOS los modelos para que SQLAlchemy los conozca
+    from .models.conversation import Conversation, Message
+    from .models.lead import Lead
+    from .models.distributor import Distributor
+    from .models.admin import AdminUser
+    
+    # Importar los nuevos modelos de inventario
+    from .models.inventory import (
+        Vendedor, 
+        Producto, 
+        StockVendedor, 
+        VentaVendedor,
+        AsignacionProductoVendedor, 
+        AjusteInventarioVendedor
+    )
+    
+    # Crear todas las tablas
     Base.metadata.create_all(bind=engine)
-    print("✅ Tablas creadas exitosamente")
+    print("✅ Tablas creadas exitosamente (incluyendo inventario)")
+    
+    return True
