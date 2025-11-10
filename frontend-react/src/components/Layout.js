@@ -1,3 +1,4 @@
+// frontend-react/src/components/Layout.js
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -8,7 +9,8 @@ import {
 import {
   Menu as MenuIcon, Dashboard as DashboardIcon, People as PeopleIcon,
   Chat as ChatIcon, PersonSearch as PersonSearchIcon, Logout as LogoutIcon,
-  AccountCircle as AccountCircleIcon, Notifications as NotificationsIcon, Spa as SpaIcon,
+  AccountCircle as AccountCircleIcon, Notifications as NotificationsIcon,
+  Spa as SpaIcon, Inventory as InventoryIcon,
 } from '@mui/icons-material';
 
 const drawerWidthExpanded = 240;
@@ -19,6 +21,7 @@ const menuItems = [
   { text: 'Distribuidores', icon: <PeopleIcon />, path: '/distributors' },
   { text: 'Conversaciones', icon: <ChatIcon />, path: '/conversations' },
   { text: 'Leads', icon: <PersonSearchIcon />, path: '/leads' },
+  { text: 'Inventario', icon: <InventoryIcon />, path: '/inventory' },
 ];
 
 const commonStyles = {

@@ -38,7 +38,6 @@ apiClient.interceptors.response.use(
 
 const api = {
   // ==================== AUTENTICACIÓN ====================
-  // ==================== AUTENTICACIÓN ====================
   login: (username, password) => {
     return apiClient.post('/auth/login', {}, {
       params: { username, password }
@@ -71,6 +70,45 @@ const api = {
   getDistributorsStats: () => apiClient.get('/distributors/stats/summary').then(res => res.data),
   getDetailedStats: () => apiClient.get('/admin/stats/detailed').then(res => res.data),
   getActivityFlow: (months = 6) => apiClient.get('/admin/stats/activity-flow', { params: { months } }).then(res => res.data),
+
+  // ==================== INVENTORY - VENDEDORES ====================
+  getVendedores: (params) => apiClient.get('/v1/inventory/vendedores', { params }).then(res => res.data),
+  getVendedor: (id) => apiClient.get(`/v1/inventory/vendedores/${id}`).then(res => res.data),
+  createVendedor: (data) => apiClient.post('/v1/inventory/vendedores', data).then(res => res.data),
+  updateVendedor: (id, data) => apiClient.put(`/v1/inventory/vendedores/${id}`, data).then(res => res.data),
+  deleteVendedor: (id) => apiClient.delete(`/v1/inventory/vendedores/${id}`).then(res => res.data),
+
+  // ==================== INVENTORY - PRODUCTOS ====================
+  getProductos: (params) => apiClient.get('/v1/inventory/productos', { params }).then(res => res.data),
+  getProducto: (id) => apiClient.get(`/v1/inventory/productos/${id}`).then(res => res.data),
+  createProducto: (data) => apiClient.post('/v1/inventory/productos', data).then(res => res.data),
+  updateProducto: (id, data) => apiClient.put(`/v1/inventory/productos/${id}`, data).then(res => res.data),
+  deleteProducto: (id) => apiClient.delete(`/v1/inventory/productos/${id}`).then(res => res.data),
+
+  // ==================== INVENTORY - STOCK ====================
+  getStock: (params) => apiClient.get('/v1/inventory/stock', { params }).then(res => res.data),
+  getStockVendedor: (vendedorId) => apiClient.get(`/v1/inventory/stock/vendedor/${vendedorId}`).then(res => res.data),
+  asignarStock: (data) => apiClient.post('/v1/inventory/stock/asignar', data).then(res => res.data),
+  updateStock: (id, data) => apiClient.put(`/v1/inventory/stock/${id}`, data).then(res => res.data),
+
+  // ==================== INVENTORY - VENTAS ====================
+  getVentas: (params) => apiClient.get('/v1/inventory/ventas', { params }).then(res => res.data),
+  getVenta: (id) => apiClient.get(`/v1/inventory/ventas/${id}`).then(res => res.data),
+  createVenta: (data) => apiClient.post('/v1/inventory/ventas', data).then(res => res.data),
+  updateVenta: (id, data) => apiClient.put(`/v1/inventory/ventas/${id}`, data).then(res => res.data),
+  deleteVenta: (id) => apiClient.delete(`/v1/inventory/ventas/${id}`).then(res => res.data),
+
+  // ==================== INVENTORY - AJUSTES ====================
+  getAjustes: (params) => apiClient.get('/v1/inventory/ajustes', { params }).then(res => res.data),
+  createAjuste: (data) => apiClient.post('/v1/inventory/ajustes', data).then(res => res.data),
+
+  // ==================== INVENTORY - ASIGNACIONES ====================
+  getAsignaciones: (params) => apiClient.get('/v1/inventory/asignaciones', { params }).then(res => res.data),
+
+  // ==================== INVENTORY - ESTADÍSTICAS ====================
+  getEstadisticasInventario: () => apiClient.get('/v1/inventory/estadisticas/general').then(res => res.data),
+  getEstadisticasVendedor: (id) => apiClient.get(`/v1/inventory/estadisticas/vendedor/${id}`).then(res => res.data),
+  getEstadisticasProducto: (id) => apiClient.get(`/v1/inventory/estadisticas/producto/${id}`).then(res => res.data),
 };
 
 export default api;

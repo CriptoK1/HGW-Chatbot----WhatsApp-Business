@@ -12,13 +12,14 @@ import Dashboard from './components/Dashboard';
 import Distributors from './components/Distributors';
 import Conversations from './components/Conversations';
 import Leads from './components/Leads';
+import Inventory from './components/Inventory';
 import Layout from './components/Layout';
 
 // 🎨 Tema personalizado
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#28a745', // Verde HGW
+      main: '#28a745',
     },
     secondary: {
       main: '#6c757d',
@@ -91,7 +92,6 @@ function App() {
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         autoHideDuration={3000}
       >
-        {/* 👇 Ya NO hay Router aquí, solo las rutas */}
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
           <Routes>
             {/* Ruta de Login */}
@@ -116,6 +116,7 @@ function App() {
               <Route path="distributors" element={<Distributors />} />
               <Route path="conversations" element={<Conversations />} />
               <Route path="leads" element={<Leads />} />
+              <Route path="inventory" element={<Inventory />} />
             </Route>
 
             {/* Ruta por defecto */}

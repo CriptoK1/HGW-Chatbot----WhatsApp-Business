@@ -1,4 +1,4 @@
-#backend/app/api/v1/inventory.py
+# backend/app/api/v1/inventory.py
 
 """
 Endpoints para el sistema de inventario y ventas
@@ -40,9 +40,7 @@ async def get_vendedores(
     estado: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene todos los vendedores con filtros opcionales
-    """
+    """Obtiene todos los vendedores con filtros opcionales"""
     query = db.query(Vendedor)
     
     if search:
@@ -51,7 +49,7 @@ async def get_vendedores(
             or_(
                 Vendedor.nombre.ilike(search_filter),
                 Vendedor.telefono.like(search_filter),
-                Vendedor.email.ilike(search_filter) if Vendedor.email else False
+                Vendedor.email.ilike(search_filter)
             )
         )
     
@@ -66,19 +64,15 @@ async def get_vendedores(
 
 @router.get("/vendedores/{vendedor_id}", response_model=VendedorResponse)
 async def get_vendedor(vendedor_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene un vendedor específico
-    """
+    """Obtiene un vendedor específico"""
     vendedor = db.query(Vendedor).filter(Vendedor.id == vendedor_id).first()
     if not vendedor:
         raise HTTPException(status_code=404, detail="Vendedor no encontrado")
     return vendedor
 
-@router.post("/vendedores", response_model=VendedorResponse)
+@router.post("/vendedores", response_model=VendedorResponse, status_code=status.HTTP_201_CREATED)
 async def create_vendedor(vendedor: VendedorCreate, db: Session = Depends(get_db)):
-    """
-    Crea un nuevo vendedor
-    """
+    """Crea un nuevo vendedor"""
     # Verificar teléfono único
     existing = db.query(Vendedor).filter(Vendedor.telefono == vendedor.telefono).first()
     if existing:
@@ -96,9 +90,7 @@ async def update_vendedor(
     vendedor: VendedorUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Actualiza un vendedor existente
-    """
+    """Actualiza un vendedor existente"""
     db_vendedor = db.query(Vendedor).filter(Vendedor.id == vendedor_id).first()
     if not db_vendedor:
         raise HTTPException(status_code=404, detail="Vendedor no encontrado")
@@ -117,11 +109,9 @@ async def update_vendedor(
     db.refresh(db_vendedor)
     return db_vendedor
 
-@router.delete("/vendedores/{vendedor_id}")
+@router.delete("/vendedores/{vendedor_id}", status_code=status.HTTP_200_OK)
 async def delete_vendedor(vendedor_id: int, db: Session = Depends(get_db)):
-    """
-    Elimina un vendedor (soft delete)
-    """
+    """Elimina un vendedor (soft delete)"""
     db_vendedor = db.query(Vendedor).filter(Vendedor.id == vendedor_id).first()
     if not db_vendedor:
         raise HTTPException(status_code=404, detail="Vendedor no encontrado")
@@ -145,9 +135,7 @@ async def get_productos(
     estado: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene todos los productos con filtros opcionales
-    """
+    """Obtiene todos los productos con filtros opcionales"""
     query = db.query(Producto)
     
     if search:
@@ -156,7 +144,7 @@ async def get_productos(
             or_(
                 Producto.nombre.ilike(search_filter),
                 Producto.codigo.like(search_filter),
-                Producto.descripcion.ilike(search_filter) if Producto.descripcion else False
+                Producto.descripcion.ilike(search_filter)
             )
         )
     
@@ -171,19 +159,15 @@ async def get_productos(
 
 @router.get("/productos/{producto_id}", response_model=ProductoResponse)
 async def get_producto(producto_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene un producto específico
-    """
+    """Obtiene un producto específico"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     return producto
 
-@router.post("/productos", response_model=ProductoResponse)
+@router.post("/productos", response_model=ProductoResponse, status_code=status.HTTP_201_CREATED)
 async def create_producto(producto: ProductoCreate, db: Session = Depends(get_db)):
-    """
-    Crea un nuevo producto
-    """
+    """Crea un nuevo producto"""
     # Verificar código único
     existing = db.query(Producto).filter(Producto.codigo == producto.codigo).first()
     if existing:
@@ -201,9 +185,7 @@ async def update_producto(
     producto: ProductoUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Actualiza un producto existente
-    """
+    """Actualiza un producto existente"""
     db_producto = db.query(Producto).filter(Producto.id == producto_id).first()
     if not db_producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -222,11 +204,9 @@ async def update_producto(
     db.refresh(db_producto)
     return db_producto
 
-@router.delete("/productos/{producto_id}")
+@router.delete("/productos/{producto_id}", status_code=status.HTTP_200_OK)
 async def delete_producto(producto_id: int, db: Session = Depends(get_db)):
-    """
-    Elimina un producto (soft delete)
-    """
+    """Elimina un producto (soft delete)"""
     db_producto = db.query(Producto).filter(Producto.id == producto_id).first()
     if not db_producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -261,9 +241,7 @@ async def get_stock(
     limit: int = Query(default=100, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene el stock de vendedores
-    """
+    """Obtiene el stock de vendedores"""
     query = db.query(StockVendedor)
     
     if vendedor_id:
@@ -277,19 +255,15 @@ async def get_stock(
 
 @router.get("/stock/vendedor/{vendedor_id}", response_model=List[StockResponse])
 async def get_stock_vendedor(vendedor_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene todo el stock de un vendedor específico
-    """
+    """Obtiene todo el stock de un vendedor específico"""
     stock_items = db.query(StockVendedor).filter(
         StockVendedor.vendedor_id == vendedor_id
     ).all()
     return stock_items
 
-@router.post("/stock/asignar", response_model=dict)
+@router.post("/stock/asignar", status_code=status.HTTP_201_CREATED)
 async def asignar_stock(asignacion: StockCreate, db: Session = Depends(get_db)):
-    """
-    Asigna stock inicial a un vendedor
-    """
+    """Asigna stock inicial a un vendedor"""
     # Verificar que existan vendedor y producto
     vendedor = db.query(Vendedor).filter(Vendedor.id == asignacion.vendedor_id).first()
     if not vendedor:
@@ -343,9 +317,7 @@ async def update_stock(
     stock_update: StockUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Actualiza el stock actual de un vendedor-producto
-    """
+    """Actualiza el stock actual de un vendedor-producto"""
     stock = db.query(StockVendedor).filter(StockVendedor.id == stock_id).first()
     if not stock:
         raise HTTPException(status_code=404, detail="Stock no encontrado")
@@ -387,9 +359,7 @@ async def get_ventas(
     limit: int = Query(default=100, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene las ventas con filtros opcionales
-    """
+    """Obtiene las ventas con filtros opcionales"""
     query = db.query(VentaVendedor)
     
     if vendedor_id:
@@ -409,19 +379,15 @@ async def get_ventas(
 
 @router.get("/ventas/{venta_id}", response_model=VentaResponse)
 async def get_venta(venta_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene una venta específica
-    """
+    """Obtiene una venta específica"""
     venta = db.query(VentaVendedor).filter(VentaVendedor.id == venta_id).first()
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
     return venta
 
-@router.post("/ventas", response_model=VentaResponse)
+@router.post("/ventas", response_model=VentaResponse, status_code=status.HTTP_201_CREATED)
 async def create_venta(venta: VentaCreate, db: Session = Depends(get_db)):
-    """
-    Registra una nueva venta
-    """
+    """Registra una nueva venta"""
     # Verificar stock disponible
     stock = db.query(StockVendedor).filter(
         StockVendedor.vendedor_id == venta.vendedor_id,
@@ -429,7 +395,10 @@ async def create_venta(venta: VentaCreate, db: Session = Depends(get_db)):
     ).first()
     
     if not stock:
-        raise HTTPException(status_code=404, detail="No hay stock asignado para este producto y vendedor")
+        raise HTTPException(
+            status_code=404, 
+            detail="No hay stock asignado para este producto y vendedor"
+        )
     
     if stock.cantidad_actual < venta.cantidad:
         raise HTTPException(
@@ -438,13 +407,17 @@ async def create_venta(venta: VentaCreate, db: Session = Depends(get_db)):
         )
     
     # Obtener precio del producto si no se especificó
-    if not venta.precio_venta:
+    precio_venta = venta.precio_venta
+    if not precio_venta:
         producto = db.query(Producto).filter(Producto.id == venta.producto_id).first()
-        venta.precio_venta = producto.precio_unitario
+        precio_venta = producto.precio_unitario
     
     # Crear la venta
-    db_venta = VentaVendedor(**venta.dict())
+    venta_data = venta.dict()
+    venta_data['precio_venta'] = precio_venta
+    db_venta = VentaVendedor(**venta_data)
     db.add(db_venta)
+    db.flush()  # Para obtener el ID antes del commit
     
     # Actualizar stock
     stock.cantidad_actual -= venta.cantidad
@@ -472,9 +445,7 @@ async def update_venta(
     venta_update: VentaUpdate,
     db: Session = Depends(get_db)
 ):
-    """
-    Actualiza una venta existente
-    """
+    """Actualiza una venta existente"""
     venta = db.query(VentaVendedor).filter(VentaVendedor.id == venta_id).first()
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
@@ -488,7 +459,7 @@ async def update_venta(
         
         diferencia = venta_update.cantidad - venta.cantidad
         
-        if stock.cantidad_actual < diferencia:
+        if diferencia > 0 and stock.cantidad_actual < diferencia:
             raise HTTPException(
                 status_code=400,
                 detail=f"Stock insuficiente para ajustar la venta. Disponible: {stock.cantidad_actual}"
@@ -520,11 +491,9 @@ async def update_venta(
     db.refresh(venta)
     return venta
 
-@router.delete("/ventas/{venta_id}")
+@router.delete("/ventas/{venta_id}", status_code=status.HTTP_200_OK)
 async def delete_venta(venta_id: int, db: Session = Depends(get_db)):
-    """
-    Elimina una venta y restaura el stock
-    """
+    """Elimina una venta y restaura el stock"""
     venta = db.query(VentaVendedor).filter(VentaVendedor.id == venta_id).first()
     if not venta:
         raise HTTPException(status_code=404, detail="Venta no encontrada")
@@ -536,6 +505,7 @@ async def delete_venta(venta_id: int, db: Session = Depends(get_db)):
     ).first()
     
     if stock:
+        cantidad_anterior = stock.cantidad_actual
         stock.cantidad_actual += venta.cantidad
         
         # Registrar ajuste
@@ -544,7 +514,7 @@ async def delete_venta(venta_id: int, db: Session = Depends(get_db)):
             producto_id=venta.producto_id,
             tipo_ajuste="aumento",
             cantidad=venta.cantidad,
-            cantidad_anterior=stock.cantidad_actual - venta.cantidad,
+            cantidad_anterior=cantidad_anterior,
             cantidad_nueva=stock.cantidad_actual,
             razon=f"Cancelación de venta ID: {venta_id}",
             ajustado_por=1
@@ -569,9 +539,7 @@ async def get_ajustes(
     limit: int = Query(default=100, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene el historial de ajustes de inventario
-    """
+    """Obtiene el historial de ajustes de inventario"""
     query = db.query(AjusteInventarioVendedor)
     
     if vendedor_id:
@@ -583,14 +551,14 @@ async def get_ajustes(
     if tipo_ajuste:
         query = query.filter(AjusteInventarioVendedor.tipo_ajuste == tipo_ajuste)
     
-    ajustes = query.order_by(AjusteInventarioVendedor.fecha_ajuste.desc()).offset(skip).limit(limit).all()
+    ajustes = query.order_by(
+        AjusteInventarioVendedor.fecha_ajuste.desc()
+    ).offset(skip).limit(limit).all()
     return ajustes
 
-@router.post("/ajustes", response_model=AjusteResponse)
+@router.post("/ajustes", response_model=AjusteResponse, status_code=status.HTTP_201_CREATED)
 async def create_ajuste(ajuste: AjusteCreate, db: Session = Depends(get_db)):
-    """
-    Registra un ajuste manual de inventario
-    """
+    """Registra un ajuste manual de inventario"""
     # Verificar stock existente
     stock = db.query(StockVendedor).filter(
         StockVendedor.vendedor_id == ajuste.vendedor_id,
@@ -598,7 +566,10 @@ async def create_ajuste(ajuste: AjusteCreate, db: Session = Depends(get_db)):
     ).first()
     
     if not stock:
-        raise HTTPException(status_code=404, detail="No existe stock para este vendedor y producto")
+        raise HTTPException(
+            status_code=404, 
+            detail="No existe stock para este vendedor y producto"
+        )
     
     cantidad_anterior = stock.cantidad_actual
     
@@ -644,15 +615,15 @@ async def get_asignaciones(
     limit: int = Query(default=100, le=1000),
     db: Session = Depends(get_db)
 ):
-    """
-    Obtiene el historial de asignaciones de productos
-    """
+    """Obtiene el historial de asignaciones de productos"""
     query = db.query(AsignacionProductoVendedor)
     
     if vendedor_id:
         query = query.filter(AsignacionProductoVendedor.vendedor_id == vendedor_id)
     
-    asignaciones = query.order_by(AsignacionProductoVendedor.fecha_asignacion.desc()).offset(skip).limit(limit).all()
+    asignaciones = query.order_by(
+        AsignacionProductoVendedor.fecha_asignacion.desc()
+    ).offset(skip).limit(limit).all()
     return asignaciones
 
 # ===============================================
@@ -661,9 +632,7 @@ async def get_asignaciones(
 
 @router.get("/estadisticas/general")
 async def get_estadisticas_general(db: Session = Depends(get_db)):
-    """
-    Obtiene estadísticas generales del inventario
-    """
+    """Obtiene estadísticas generales del inventario"""
     total_vendedores = db.query(Vendedor).filter(Vendedor.estado == "activo").count()
     total_productos = db.query(Producto).filter(Producto.estado == "activo").count()
     
@@ -676,8 +645,9 @@ async def get_estadisticas_general(db: Session = Depends(get_db)):
     ).join(Producto).scalar() or 0
     
     # Ventas del mes
-    from datetime import datetime, timedelta
-    inicio_mes = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    inicio_mes = datetime.now().replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
     
     ventas_mes = db.query(VentaVendedor).filter(
         VentaVendedor.fecha_venta >= inicio_mes
@@ -692,7 +662,7 @@ async def get_estadisticas_general(db: Session = Depends(get_db)):
     return {
         "total_vendedores": total_vendedores,
         "total_productos": total_productos,
-        "stock_total": stock_total,
+        "stock_total": int(stock_total),
         "valor_inventario": float(valor_inventario),
         "ventas_mes": ventas_mes,
         "valor_ventas_mes": float(valor_ventas_mes)
@@ -700,9 +670,7 @@ async def get_estadisticas_general(db: Session = Depends(get_db)):
 
 @router.get("/estadisticas/vendedor/{vendedor_id}")
 async def get_estadisticas_vendedor(vendedor_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene estadísticas de un vendedor específico
-    """
+    """Obtiene estadísticas de un vendedor específico"""
     vendedor = db.query(Vendedor).filter(Vendedor.id == vendedor_id).first()
     if not vendedor:
         raise HTTPException(status_code=404, detail="Vendedor no encontrado")
@@ -738,9 +706,10 @@ async def get_estadisticas_vendedor(vendedor_id: int, db: Session = Depends(get_
     ).scalar() or 0
     
     return {
-        "vendedor": vendedor.to_dict(),
+        "vendedor_id": vendedor.id,
+        "vendedor_nombre": vendedor.nombre,
         "productos_asignados": productos_asignados,
-        "stock_total": stock_total,
+        "stock_total": int(stock_total),
         "valor_inventario": float(valor_inventario),
         "total_ventas": total_ventas,
         "valor_vendido": float(valor_vendido)
@@ -748,9 +717,7 @@ async def get_estadisticas_vendedor(vendedor_id: int, db: Session = Depends(get_
 
 @router.get("/estadisticas/producto/{producto_id}")
 async def get_estadisticas_producto(producto_id: int, db: Session = Depends(get_db)):
-    """
-    Obtiene estadísticas de un producto específico
-    """
+    """Obtiene estadísticas de un producto específico"""
     producto = db.query(Producto).filter(Producto.id == producto_id).first()
     if not producto:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -779,10 +746,13 @@ async def get_estadisticas_producto(producto_id: int, db: Session = Depends(get_
     ).scalar() or 0
     
     return {
-        "producto": producto.to_dict(),
-        "stock_total": stock_total,
+        "producto_id": producto.id,
+        "producto_nombre": producto.nombre,
+        "producto_codigo": producto.codigo,
+        "precio_unitario": float(producto.precio_unitario),
+        "stock_total": int(stock_total),
         "vendedores_asignados": vendedores_con_producto,
-        "total_vendido": total_vendido,
+        "total_vendido": int(total_vendido),
         "valor_vendido": float(valor_vendido),
         "valor_en_stock": float(stock_total * producto.precio_unitario)
     }
