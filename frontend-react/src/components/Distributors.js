@@ -14,7 +14,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { format } from 'date-fns';
 import api from '../api/apiClient';
 
-const NIVEL = { Master: '#8b5cf6', Senior: '#3b82f6', Junior: '#10b981', 'Pre-Junior': '#6c757d' };
+const NIVEL = { Diamante: '#00bcd4', Platino: '#9e8a97', Oro: '#facc15', Plata: '#c0c0c0', Master: '#8b5cf6', Senior: '#3b82f6', Junior: '#10b981', 'Pre-Junior': '#6c757d' };
 const ESTADO = { activo: '#10b981', suspendido: '#f59e0b', inactivo: '#ef4444' };
 
 const initialForm = {
@@ -387,6 +387,10 @@ function Distributors() {
               <MenuItem value="Junior">Junior</MenuItem>
               <MenuItem value="Senior">Senior</MenuItem>
               <MenuItem value="Master">Master</MenuItem>
+              <MenuItem value="Plata">Plata</MenuItem>
+              <MenuItem value="Oro">Oro</MenuItem>
+              <MenuItem value="Platino">Platino</MenuItem>
+              <MenuItem value="Diamante">Diamante</MenuItem>
             </TextField>
           </Grid>
           <Grid item xs={12} sm={12} md={2}>
@@ -473,6 +477,10 @@ function Distributors() {
                       <MenuItem value="Junior">Junior</MenuItem>
                       <MenuItem value="Senior">Senior</MenuItem>
                       <MenuItem value="Master">Master</MenuItem>
+                      <MenuItem value="Plata">Plata</MenuItem>
+                      <MenuItem value="Oro">Oro</MenuItem>
+                      <MenuItem value="Platino">Platino</MenuItem>
+                      <MenuItem value="Diamante">Diamante</MenuItem>
                     </TextField>
                   )} />
               </Grid>

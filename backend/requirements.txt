@@ -10,7 +10,7 @@ pymysql==1.1.1
 # Seguridad y autenticación
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-bcrypt==4.1.2  # ✅ CAMBIAR DE 4.2.0 a 4.1.2
+bcrypt==4.1.2  
 cryptography==43.0.1
 
 # Variables de entorno
