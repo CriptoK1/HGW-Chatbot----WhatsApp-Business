@@ -9,6 +9,8 @@ from fastapi.responses import JSONResponse
 import logging
 import os
 
+from ..api.v1 import distributors, inventory
+
 # Importar configuración
 from .config import settings
 from .database import init_db
@@ -16,12 +18,10 @@ from .database import init_db
 # Importar routers existentes
 from .api.v1 import (
     chatbot,
-    distributors,
     conversations,
     leads,
     admin,
-    stats,
-    inventory  # NUEVO: Importar el router de inventario
+    stats  # NUEVO: Importar el router de inventario
 )
 
 # ==================== NGROK ====================
