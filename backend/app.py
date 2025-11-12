@@ -3,6 +3,9 @@ from fastapi import FastAPI, Request, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 import os
+import sys
+import importlib.util
+from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime
 from passlib.context import CryptContext
@@ -15,6 +18,30 @@ from admin_routes import router as admin_router
 from distributor_routes import router as distributor_router
 from chatbot import ChatbotService
 
+# 🆕 Importar rutas de inventario
+try:
+    # Cargar el módulo desde backend/api/v1/inventory.py
+    inventory_path = Path(__file__).parent / "api" / "v1" / "inventory.py"
+    
+    if not inventory_path.exists():
+        raise FileNotFoundError(f"No se encontró: {inventory_path}")
+    
+    spec = importlib.util.spec_from_file_location("inventory_module", str(inventory_path))
+    inventory_module = importlib.util.module_from_spec(spec)
+    sys.modules["inventory_module"] = inventory_module
+    spec.loader.exec_module(inventory_module)
+    
+    inventory_router = inventory_module.router
+    INVENTORY_ENABLED = True
+    print("✅ Módulo de inventario cargado correctamente")
+    print(f"   📂 Desde: api/v1/inventory.py")
+    
+except Exception as e:
+    INVENTORY_ENABLED = False
+    inventory_router = None
+    print(f"⚠️ Módulo de inventario no disponible")
+    print(f"   ❌ Error: {e}")
+
 # ==================== NGROK ====================
 from pyngrok import ngrok
 
@@ -26,10 +53,15 @@ app = FastAPI(
     docs_url="/api/docs"
 )
 
-# CORS
+# CORS - 🆕 Agregado más orígenes
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -224,7 +256,14 @@ async def get_distributor_with_passwords(distributor_id: int, db=Depends(get_db)
     
     return data
 
-# Routers (el orden importa - endpoints específicos antes del router)
+# ==================== ROUTERS ====================
+
+# 🆕 Incluir router de inventario si está disponible
+if INVENTORY_ENABLED and inventory_router:
+    app.include_router(inventory_router, prefix="/api/v1")
+    print("✅ Rutas de inventario registradas en /api/v1/inventory")
+
+# Otros routers (el orden importa - endpoints específicos antes del router)
 app.include_router(admin_router, prefix="/api/admin", tags=["Admin"])
 app.include_router(distributor_router, prefix="/api/distributors", tags=["Distributors"])
 

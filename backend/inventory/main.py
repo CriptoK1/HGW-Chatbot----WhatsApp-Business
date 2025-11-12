@@ -209,7 +209,6 @@ app.include_router(
     tags=["estadísticas"]
 )
 
-# NUEVO: Sistema de Inventario
 app.include_router(
     inventory.router,
     prefix="/api/v1",
