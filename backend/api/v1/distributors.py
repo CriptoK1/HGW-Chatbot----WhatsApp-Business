@@ -9,8 +9,8 @@ from datetime import datetime, date
 from passlib.context import CryptContext
 
 from ...database import get_db
-from ...inventory.models.distributor import Distributor
-from ...inventory.schemas.distributor import (
+from ..models.distributor import Distributor
+from ...schemas.distributor import (
     DistributorCreate, 
     DistributorUpdate, 
     DistributorResponse,

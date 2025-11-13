@@ -287,9 +287,11 @@ async def get_stats(db=Depends(get_db)):
         "high_interest_leads": db.query(Lead).filter(Lead.interest_level >= 7).count()
     }
 
+# backend/app.py - SOLO LA PARTE A REEMPLAZAR
+
 @app.get("/api/distributors/stats/summary")
 async def get_distributors_stats(db=Depends(get_db)):
-    """Obtiene estadísticas de los distribuidores - VERSIÓN CORREGIDA"""
+    """Obtiene estadísticas de los distribuidores - VERSIÓN CORREGIDA CON TODOS LOS NIVELES"""
     from sqlalchemy import text
     
     try:
@@ -298,14 +300,31 @@ async def get_distributors_stats(db=Depends(get_db)):
         inactivos = db.execute(text("SELECT COUNT(id) FROM distributors WHERE estado = 'inactivo'")).scalar() or 0
         suspendidos = db.execute(text("SELECT COUNT(id) FROM distributors WHERE estado = 'suspendido'")).scalar() or 0
         
-        # Contar por nivel
+        # ⭐ TODOS LOS NIVELES - SINCRONIZADO CON FRONTEND
+        niveles_lista = [
+            "Pre-Junior", 
+            "Junior", 
+            "Senior", 
+            "Master", 
+            "Plata", 
+            "Oro", 
+            "Platino", 
+            "Diamante"
+        ]
+        
+        # Contar por nivel (todos los estados, no solo activos)
         niveles = {}
-        for nivel in ["Pre-Junior", "Junior", "Senior", "Master"]:
+        for nivel in niveles_lista:
             count = db.execute(
-                text("SELECT COUNT(id) FROM distributors WHERE nivel = :nivel AND estado = 'activo'"),
+                text("SELECT COUNT(id) FROM distributors WHERE nivel = :nivel"),
                 {"nivel": nivel}
             ).scalar() or 0
-            niveles[nivel] = count
+            
+            # Solo agregar al resultado si hay distribuidores de ese nivel
+            if count > 0:
+                niveles[nivel] = count
+        
+        print(f"📊 Estadísticas por nivel: {niveles}")  # Para debug
         
         return {
             "total": total,
