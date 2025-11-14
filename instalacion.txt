@@ -1,5 +1,4 @@
 pip uninstall -r requirements.txt -y
-cd hgw-chatbot
 cd backend
 py -m venv venv
 source venv/Scripts/activate
@@ -16,7 +15,6 @@ python
 
 ngrok http 8000
 
-cd hgw-chatbot
 cd frontend-react
 npm install @mui/icons-material
 npm run start

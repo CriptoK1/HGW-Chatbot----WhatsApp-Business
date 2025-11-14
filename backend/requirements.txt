@@ -5,7 +5,8 @@ python-multipart==0.0.12
 
 # Base de datos
 sqlalchemy==2.0.35
-pymysql==1.1.1
+# Para Python 3.13 en Windows - psycopg3 versión correcta
+psycopg[binary]==3.2.3
 
 # Seguridad y autenticación
 python-jose[cryptography]==3.3.0
@@ -19,7 +20,7 @@ python-dotenv==1.0.1
 # Cliente HTTP
 httpx==0.27.2
 
-# OpenAI (opcional)
+# OpenAI
 openai==1.51.2
 
 # Validación de datos
@@ -29,6 +30,3 @@ email-validator==2.2.0
 
 # Utilidades
 python-dateutil==2.9.0
-
-# Ngrok
-pyngrok==7.2.0

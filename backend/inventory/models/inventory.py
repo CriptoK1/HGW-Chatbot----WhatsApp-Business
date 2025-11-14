@@ -1,5 +1,5 @@
 # backend/app/models/inventory.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, DECIMAL, Enum, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, DECIMAL, Index
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import sys
@@ -21,7 +21,7 @@ class Vendedor(Base):
     email = Column(String(255))
     direccion = Column(Text)
     ciudad = Column(String(100))
-    estado = Column(Enum('activo', 'inactivo'), default='activo')
+    estado = Column(String(50), default='activo')
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -53,7 +53,7 @@ class Producto(Base):
     codigo = Column(String(50), unique=True, index=True)
     precio_unitario = Column(DECIMAL(10, 2), nullable=False)
     categoria = Column(String(100))
-    estado = Column(Enum('activo', 'inactivo'), default='activo')
+    estado = Column(String(50), default='activo')
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
     fecha_actualizacion = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
