@@ -37,10 +37,16 @@ apiClient.interceptors.response.use(
 );
 
 const api = {
-  // ==================== AUTENTICACIÓN ====================
+  // ==================== AUTENTICACIÓN - CORREGIDO ====================
   login: (username, password) => {
-    return apiClient.post('/auth/login', {}, {
-      params: { username, password }
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+
+    return apiClient.post('/auth/login', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     }).then(res => res.data);
   },
 
