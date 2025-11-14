@@ -342,5 +342,27 @@ async def get_distributors_stats(db=Depends(get_db)):
 # ==================== EJECUCIÓN ====================
 if __name__ == "__main__":
     import uvicorn
+    import os
+    
+    # Detectar entorno
+    is_dev = os.getenv("DEBUG", "False").lower() == "true"
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
+    
+    if is_dev:
+        # Desarrollo: con reload
+        print("🔧 Modo DESARROLLO")
+        uvicorn.run(
+            "app:app", 
+            host="127.0.0.1",  # Solo localhost en desarrollo
+            port=port, 
+            reload=True  # Auto-reload cuando cambies código
+        )
+    else:
+        # Producción: sin reload
+        print("🚀 Modo PRODUCCIÓN")
+        uvicorn.run(
+            "app:app", 
+            host="0.0.0.0",  # Todas las interfaces en producción
+            port=port, 
+            reload=False  # Sin reload para mejor rendimiento
+        )

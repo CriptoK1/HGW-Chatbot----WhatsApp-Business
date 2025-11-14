@@ -38,3 +38,9 @@ __pycache__/
 # Cache
 .eslintcache
 *.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
