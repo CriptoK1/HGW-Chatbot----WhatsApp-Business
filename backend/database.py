@@ -6,22 +6,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ✅ OBTENER DATABASE_URL COMPLETO
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ✅ CRÍTICO: Render usa postgres:// pero SQLAlchemy necesita postgresql://
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-    print("✅ URL de PostgreSQL corregida")
-
-# ✅ Si no hay DATABASE_URL (solo desarrollo local)
-if not DATABASE_URL:
+if DATABASE_URL:
+    # Render usa postgres://, cambiar a postgresql://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        print("✅ URL de PostgreSQL corregida para Render")
+    
+    # Si estamos en local con psycopg3
+    try:
+        import psycopg
+        if "postgresql://" in DATABASE_URL and "postgresql+psycopg://" not in DATABASE_URL:
+            DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+            print("✅ Usando psycopg3 (local)")
+    except ImportError:
+        # En Render usará psycopg2
+        print("✅ Usando psycopg2 (producción)")
+else:
+    # Fallback para desarrollo local
     print("⚠️ DATABASE_URL no encontrada, usando configuración local")
-    DATABASE_URL = "postgresql://hgw_user:4RKbLFTurg3DtkVIArb5DrrXpqEaovE0@dpg-d4ala6muk2gs739hq0fg-a.oregon-postgres.render.com/hgw_chatbot"
+    DATABASE_URL = "postgresql+psycopg://hgw_user:4RKbLFTurg3DtkVIArb5DrrXpqEaovE0@dpg-d4ala6muk2gs739hq0fg-a.oregon-postgres.render.com/hgw_chatbot"
 
 print(f"🔗 Conectando a base de datos...")
 
-# Crear engine
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
