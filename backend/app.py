@@ -1,5 +1,5 @@
 # backend/app.py
-from fastapi import FastAPI, Request, HTTPException, Depends, Query
+from fastapi import FastAPI, Request, HTTPException, Depends, Query, Form 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 import os
@@ -62,10 +62,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
-        "http://localhost:3001",
+        "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001"
+        "https://hgw-chatbot-frontend.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -202,8 +201,12 @@ async def handle_webhook(request: Request, db=Depends(get_db)):
         return {"status": "error", "detail": str(e)}
 
 @app.post("/api/auth/login")
-async def login(username: str, password: str):
-    if username == "admin" and password == "admin123":
+async def login(
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    if username == "admin" and password == admin_password:
         token = create_access_token({"sub": username, "role": "admin"})
         return {
             "access_token": token,

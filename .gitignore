@@ -44,3 +44,9 @@ __pycache__/
 .idea/
 *.swp
 *.swo
+
+```
+
+.env
+.env.local
+.env.production
