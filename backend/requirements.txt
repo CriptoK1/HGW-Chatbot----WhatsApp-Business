@@ -5,7 +5,7 @@ python-multipart==0.0.12
 
 # Base de datos
 sqlalchemy==2.0.35
-psycopg2-binary==2.9.9
+psycopg[binary]==3.2.3
 
 # Seguridad y autenticación
 python-jose[cryptography]==3.3.0

@@ -9,22 +9,14 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Render usa postgres://, cambiar a postgresql://
+    # Render usa postgres://, cambiar a postgresql+psycopg://
     if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-        print("✅ URL de PostgreSQL corregida para Render")
-    
-    # Si estamos en local con psycopg3
-    try:
-        import psycopg
-        if "postgresql://" in DATABASE_URL and "postgresql+psycopg://" not in DATABASE_URL:
-            DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
-            print("✅ Usando psycopg3 (local)")
-    except ImportError:
-        # En Render usará psycopg2
-        print("✅ Usando psycopg2 (producción)")
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+    elif DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
+    print("✅ URL configurada para psycopg3")
 else:
-    # Fallback para desarrollo local
+    # Fallback para desarrollo
     print("⚠️ DATABASE_URL no encontrada, usando configuración local")
     DATABASE_URL = "postgresql+psycopg://hgw_user:4RKbLFTurg3DtkVIArb5DrrXpqEaovE0@dpg-d4ala6muk2gs739hq0fg-a.oregon-postgres.render.com/hgw_chatbot"
 
