@@ -42,8 +42,13 @@ except Exception as e:
     print(f"⚠️ Módulo de inventario no disponible")
     print(f"   ❌ Error: {e}")
 
-# ==================== NGROK ====================
-from pyngrok import ngrok
+# ==================== NGROK (solo desarrollo) ====================
+try:
+    from pyngrok import ngrok
+    NGROK_AVAILABLE = True
+except ImportError:
+    NGROK_AVAILABLE = False
+    ngrok = None
 
 load_dotenv()
 
@@ -88,8 +93,7 @@ async def startup_event():
         chatbot_service = None
         print(f"⚠️ Error inicializando ChatbotService: {e}")
     
-    # Iniciar ngrok si está habilitado
-    if os.getenv("USE_NGROK", "false").lower() == "true":
+    if NGROK_AVAILABLE and os.getenv("USE_NGROK", "false").lower() == "true":
         try:
             ngrok_auth_token = os.getenv("NGROK_AUTH_TOKEN")
             if ngrok_auth_token:
@@ -113,12 +117,12 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cerrar túnel ngrok al apagar el servidor"""
-    try:
-        ngrok.kill()
-        print("🔴 Túnel ngrok cerrado")
-    except:
-        pass
-
+    if NGROK_AVAILABLE:
+        try:
+            ngrok.kill()
+            print("🔴 Túnel ngrok cerrado")
+        except:
+            pass
 # ==================== RUTAS ====================
 
 @app.get("/")
