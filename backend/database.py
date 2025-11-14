@@ -6,25 +6,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Obtener DATABASE_URL de las variables de entorno
+# ✅ OBTENER DATABASE_URL COMPLETO
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# CRÍTICO: Render usa postgres:// pero SQLAlchemy necesita postgresql://
+# ✅ CRÍTICO: Render usa postgres:// pero SQLAlchemy necesita postgresql://
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     print("✅ URL de PostgreSQL corregida")
 
-# Si no hay DATABASE_URL (desarrollo local), construir una
+# ✅ Si no hay DATABASE_URL (solo desarrollo local)
 if not DATABASE_URL:
-    DB_USER = os.getenv("DB_USER", "hgw_user")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "HGW2025_Seguro")
-    DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = os.getenv("DB_PORT", "5432")  # PostgreSQL por defecto
-    DB_NAME = os.getenv("DB_NAME", "hgw_chatbot")
-    
-    # Usar PostgreSQL también en local
-    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    print(f"⚠️ Usando DATABASE_URL local: {DATABASE_URL}")
+    print("⚠️ DATABASE_URL no encontrada, usando configuración local")
+    DATABASE_URL = "postgresql://hgw_user:4RKbLFTurg3DtkVIArb5DrrXpqEaovE0@dpg-d4ala6muk2gs739hq0fg-a.oregon-postgres.render.com/hgw_chatbot"
+
+print(f"🔗 Conectando a base de datos...")
 
 # Crear engine
 engine = create_engine(
@@ -45,33 +40,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-def init_db():
-    """Inicializa la base de datos creando todas las tablas"""
-    try:
-        # Importar TODOS los modelos para que SQLAlchemy los conozca
-        from models import (
-            Conversation, Message, Lead, 
-            Distributor, AdminUser
-        )
-        print("✅ Modelos base importados")
-        
-        # Intentar importar modelos de inventario (si existen)
-        try:
-            from models import (
-                Vendedor, Producto, StockVendedor, 
-                VentaVendedor, AsignacionProductoVendedor, 
-                AjusteInventarioVendedor
-            )
-            print("✅ Modelos de inventario importados")
-        except ImportError as e:
-            print(f"⚠️ Modelos de inventario no disponibles: {e}")
-        
-        # Crear todas las tablas
-        Base.metadata.create_all(bind=engine)
-        print("✅ Tablas creadas exitosamente")
-        
-        return True
-    except Exception as e:
-        print(f"❌ Error inicializando base de datos: {e}")
-        return False
