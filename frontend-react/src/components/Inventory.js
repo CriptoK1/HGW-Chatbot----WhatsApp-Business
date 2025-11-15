@@ -8,11 +8,7 @@ import {
 import { Store, Inventory2, ShoppingCart, Assessment, Add, Refresh, Edit, Delete, Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 import { useForm, Controller } from 'react-hook-form';
-import axios from 'axios';
-
-const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1/inventory`;
-const api = axios.create({ baseURL: API_URL, headers: { 'Content-Type': 'application/json' } });
-api.interceptors.request.use(c => { const t = localStorage.getItem('token'); if (t) c.headers.Authorization = `Bearer ${t}`; return c; });
+import api from '../api/apiClient';
 
 const EC = { activo: '#10b981', inactivo: '#ef4444' };
 
@@ -103,9 +99,13 @@ const MobileCard = ({ item, columns, type, onEdit, onDelete }) => {
                                     <Typography variant="caption" color="text.secondary" display="block">
                                         {col.label}
                                     </Typography>
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                        {col.render ? col.render(item) : item[col.key] || '-'}
-                                    </Typography>
+                                    <Box sx={{ mt: 0.5 }}>
+                                        {col.render ? col.render(item) : (
+                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                {item[col.key] || '-'}
+                                            </Typography>
+                                        )}
+                                    </Box>
                                 </Box>
                             ))}
                         </Stack>
@@ -129,9 +129,13 @@ const MobileCard = ({ item, columns, type, onEdit, onDelete }) => {
                                             <Typography variant="caption" color="text.secondary" display="block">
                                                 {col.label}
                                             </Typography>
-                                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                                {col.render ? col.render(item) : item[col.key] || '-'}
-                                            </Typography>
+                                            <Box sx={{ mt: 0.5 }}>
+                                                {col.render ? col.render(item) : (
+                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                        {item[col.key] || '-'}
+                                                    </Typography>
+                                                )}
+                                            </Box>
                                         </Box>
                                     ))}
                                 </Stack>
@@ -151,37 +155,68 @@ export default function Inventory() {
     const [open, setOpen] = useState(false), [type, setType] = useState(''), [edit, setEdit] = useState(null);
     const { control, handleSubmit, reset, formState: { errors } } = useForm();
 
-    const ls = async () => { try { setStats((await api.get('/estadisticas/general')).data); } catch (e) { console.error(e); } };
+    const ls = async () => {
+        try {
+            setStats(await api.getEstadisticasInventario());
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const ld = React.useCallback(async () => {
         setLoad(true);
         try {
             const params = { search: q, limit: 100 };
-            if (tab === 0) setVnd((await api.get('/vendedores', { params })).data);
-            else if (tab === 1) setPrd((await api.get('/productos', { params })).data);
-            else if (tab === 2) setStk((await api.get('/stock', { params })).data);
-            else if (tab === 3) setVnt((await api.get('/ventas', { params })).data);
-        } catch (e) { sn('Error: ' + (e.response?.data?.detail || e.message), { variant: 'error' }); }
-        finally { setLoad(false); }
+            if (tab === 0) setVnd(await api.getVendedores(params));
+            else if (tab === 1) setPrd(await api.getProductos(params));
+            else if (tab === 2) setStk(await api.getStock(params));
+            else if (tab === 3) setVnt(await api.getVentas(params));
+        } catch (e) {
+            sn('Error: ' + (e.response?.data?.detail || e.message), { variant: 'error' });
+        } finally {
+            setLoad(false);
+        }
     }, [tab, q, sn]);
 
     useEffect(() => { ls(); ld(); }, [ld]);
+
     const fc = v => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v || 0);
     const od = (tp, it = null) => { setType(tp); setEdit(it); reset(it || {}); setOpen(true); };
     const cd = () => { setOpen(false); setEdit(null); reset({}); };
+
     const os = async fd => {
         try {
-            if (type === 'vendedor') edit ? await api.put(`/vendedores/${edit.id}`, fd) : await api.post('/vendedores', fd);
-            else if (type === 'producto') edit ? await api.put(`/productos/${edit.id}`, fd) : await api.post('/productos', fd);
-            else if (type === 'stock') await api.post('/stock/asignar', fd);
-            else if (type === 'venta') edit ? await api.put(`/ventas/${edit.id}`, fd) : await api.post('/ventas', fd);
-            sn(`${edit ? 'Actualizado' : 'Creado'}`, { variant: 'success' }); cd(); ld(); ls();
-        } catch (e) { sn(e.response?.data?.detail || 'Error', { variant: 'error' }); }
+            if (type === 'vendedor') {
+                edit ? await api.updateVendedor(edit.id, fd) : await api.createVendedor(fd);
+            } else if (type === 'producto') {
+                edit ? await api.updateProducto(edit.id, fd) : await api.createProducto(fd);
+            } else if (type === 'stock') {
+                await api.asignarStock(fd);
+            } else if (type === 'venta') {
+                edit ? await api.updateVenta(edit.id, fd) : await api.createVenta(fd);
+            }
+            sn(`${edit ? 'Actualizado' : 'Creado'}`, { variant: 'success' });
+            cd();
+            ld();
+            ls();
+        } catch (e) {
+            sn(e.response?.data?.detail || 'Error', { variant: 'error' });
+        }
     };
+
     const del = async (tp, id) => {
         if (!window.confirm('¿Eliminar?')) return;
-        try { await api.delete(`/${tp === 'vendedor' ? 'vendedores' : tp === 'producto' ? 'productos' : 'ventas'}/${id}`); sn('Eliminado', { variant: 'success' }); ld(); ls(); }
-        catch (e) { sn('Error', { variant: 'error' }); }
+        try {
+            if (tp === 'vendedor') await api.deleteVendedor(id);
+            else if (tp === 'producto') await api.deleteProducto(id);
+            else if (tp === 'venta') await api.deleteVenta(id);
+
+            sn('Eliminado', { variant: 'success' });
+            ld();
+            ls();
+        } catch (e) {
+            sn('Error', { variant: 'error' });
+        }
     };
 
     const rt = (d, cols, tp) => {
