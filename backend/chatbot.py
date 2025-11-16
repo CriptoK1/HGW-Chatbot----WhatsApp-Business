@@ -190,14 +190,29 @@ class ChatbotService:
 
     def _get_auto_response(self, text: str, user_name: str = None):
         """Respuestas automáticas mejoradas - LAS 5 PREGUNTAS CLAVE SON PRIORIDAD"""
-        t = text.lower()
+        t = text.lower().strip()
         greeting = f"¡Hola {user_name}! 👋" if user_name else "¡Hola! 👋"
+
+        if t in ["1", "1️⃣"]:
+            t = "qué es hgw"
+        elif t in ["2", "2️⃣"]:
+            t = "qué tengo que hacer"
+        elif t in ["3", "3️⃣"]:
+            t = "inversión"
+        elif t in ["4", "4️⃣"]:
+            t = "recuperar inversión"
+        elif t in ["5", "5️⃣"]:
+            t = "cuándo gano"
+        elif t in ["6", "6️⃣"]:
+            t = "productos"
+        elif t in ["7", "7️⃣"]:
+            t = "richard"
         
         # ============ SALUDO INICIAL MEJORADO ============
         if any(w in t for w in ["hola", "buenas", "buenos días", "buenas tardes", "hi", "hello"]) and len(t) < 25:
             return f"""{greeting}
 
-¡Bienvenido a *HGW - Empoderando Líderes* con Richard Córdoba! 🌿
+           ¡Bienvenido a *HGW - Empoderando Líderes* con Richard Córdoba! 🌿
 
 Antes de empezar, déjame contarte lo MÁS IMPORTANTE en *5 puntos clave*:
 
@@ -224,10 +239,12 @@ Escribe el número o palabra:
 3️⃣ *Inversión* (todos los planes)
 4️⃣ *Recuperar inversión* (con ejemplos)
 5️⃣ *Cuándo gano dinero* (cronograma real)
-🛒 *Ver productos*
-📞 *Hablar con Richard*
+6️⃣ *Ver productos*
+7️⃣ *Hablar con Richard*
 
 O dime tu nombre para personalizar tu experiencia 😊"""
+        
+
 
         # ============ 1. ¿QUÉ ES HGW? - RESPUESTA COMPLETA Y DETALLADA ============
         if any(w in t for w in ["qué es hgw", "que es hgw", "qué es", "que es", "empresa", "compañía", "explicame hgw", "sobre hgw", "cuéntame de hgw"]):
